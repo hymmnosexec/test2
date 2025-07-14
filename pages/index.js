@@ -58,25 +58,11 @@ export default function HomePage({ initialActivities }) {
               </a>
               <button onClick={async () => {
                   await logout();
-                  router.push('/');
                 }}
                 className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
               >
                 退出登录
               </button>
-            </>
-          )}
-          {isAdmin && (
-            <>
-              <a href="/admin/review-signups" className="bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600">
-                审核报名
-              </a>
-              <a href="/add-activity" className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
-                添加新活动
-              </a>
-              <a href="/rewards" className="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600">
-                修改积分商城
-              </a>
             </>
           )}
         </div>
@@ -85,9 +71,9 @@ export default function HomePage({ initialActivities }) {
         {activities.map(activity => (
           <li key={activity.id} className="p-4 border rounded-lg shadow-sm">
             <h3 className="text-xl font-semibold mb-2">{activity.title}</h3>
-            <p className="text-gray-600 mb-4">{activity.description}</p>
-            {/* 新增：显示服务时长 */}
-            <p className="text-gray-600 font-semibold">服务时长：{activity.service_hours} 小时</p>
+            <p className="text-gray-600 mb-2">{activity.description}</p>
+            <p className="text-gray-600 mb-2 font-semibold">服务时长：{activity.service_hours} 小时</p>
+            <p className="text-gray-600 mb-4 text-sm">发布者：{activity.creator_username || '未知'}</p>
             {isLoggedIn && (
               <button
                 onClick={() => handleSignup(activity.id)}
@@ -114,7 +100,6 @@ export default function HomePage({ initialActivities }) {
 
 export async function getServerSideProps() {
   const db = (await import('../lib/db')).default;
-  // 确保在查询中选择了 service_hours 字段
   const activities = db.prepare("SELECT * FROM activities").all();
   return { props: { initialActivities: activities } };
 }

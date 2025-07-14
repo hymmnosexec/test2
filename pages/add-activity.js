@@ -6,14 +6,19 @@ import useAuth from '../hooks/useAuth';
 export default function AddActivity() {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [serviceHours, setServiceHours] = useState(0); // 新增状态
+  const [serviceHours, setServiceHours] = useState(0); 
   const [message, setMessage] = useState('');
   const router = useRouter();
-  const { isLoggedIn, isAdmin } = useAuth();
-
+  const { isLoggedIn, isAdmin, user } = useAuth(); // 获取 user 对象
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
     setMessage('');
+
+    if (!isLoggedIn || !isAdmin) {
+      setMessage('无权限操作。');
+      return;
+    }
 
     try {
       const res = await fetch('/api/add-activity', {
@@ -22,17 +27,18 @@ export default function AddActivity() {
         body: JSON.stringify({ 
           title, 
           description, 
-          service_hours: parseInt(serviceHours) // 发送服务时长
+          service_hours: parseInt(serviceHours),
+          creator_username: user.username // 新增：发送创建者的用户名
         }),
       });
 
       const data = await res.json();
       if (res.ok) {
         setMessage(data.message);
-        // 清空表单
         setTitle('');
         setDescription('');
         setServiceHours(0);
+        router.push('/admin/my-activities'); // 成功后跳转到我发布的活动页面
       } else {
         setMessage(data.message);
       }

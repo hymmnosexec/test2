@@ -1,47 +1,46 @@
 // context/AuthContext.js
 import { createContext, useState, useEffect } from 'react';
-import Cookies from 'js-cookie';
-import { useRouter } from 'next/router'; // 引入 useRouter
+import { useRouter } from 'next/router';
 
-export const AuthContext = createContext({
-  user: null,
-  isLoggedIn: false,
-  isAdmin: false,
-  logout: () => {},
-});
+export const AuthContext = createContext();
 
-export const AuthProvider = ({ children }) => {
+export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
-  const router = useRouter(); // 获取路由对象
+  const router = useRouter();
 
   useEffect(() => {
-    const username = Cookies.get('username');
-    if (username) {
-      setUser({ username });
+    const cookies = document.cookie;
+    const usernameCookie = cookies?.split(';').find(c => c.trim().startsWith('username='));
+
+    if (usernameCookie) {
+      const username = usernameCookie.split('=')[1];
+      const isAdmin = username === 'admin';
+      setUser({ username, isAdmin });
     } else {
       setUser(null);
     }
-  }, [router.asPath]); // 将 router.asPath 作为依赖项
+  }, []);
+
+  const login = (userData) => {
+    setUser(userData);
+  };
+
+const logout = async () => {
+    // 向服务端发送登出请求
+    try {
+      await fetch('/api/logout', { method: 'POST' });
+    } catch (error) {
+      console.error('登出失败:', error);
+    }
+    // 客户端清除状态
+    setUser(null);
+    router.push('/');
+  };
 
   const isLoggedIn = !!user;
-  const isAdmin = user && user.username === 'admin';
+  const isAdmin = user && user.isAdmin;
 
-  const logout = async () => {
-    await fetch('/api/logout'); 
-    Cookies.remove('username');
-    setUser(null);
-  };
+  const value = { user, isLoggedIn, isAdmin, login, logout };
 
-  const value = {
-    user,
-    isLoggedIn,
-    isAdmin,
-    logout,
-  };
-
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
-};
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+}
