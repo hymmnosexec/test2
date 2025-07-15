@@ -6,11 +6,12 @@ import useAuth from '../hooks/useAuth';
 export default function AddActivity() {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [serviceHours, setServiceHours] = useState(0); 
+  const [serviceHours, setServiceHours] = useState(0);
+  const [imageUrl, setImageUrl] = useState(''); // 新增：图片 URL 状态
   const [message, setMessage] = useState('');
   const router = useRouter();
-  const { isLoggedIn, isAdmin, user } = useAuth(); // 获取 user 对象
-  
+  const { isLoggedIn, isAdmin, user } = useAuth();
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setMessage('');
@@ -28,7 +29,8 @@ export default function AddActivity() {
           title, 
           description, 
           service_hours: parseInt(serviceHours),
-          creator_username: user.username // 新增：发送创建者的用户名
+          creator_username: user.username,
+          image_url: imageUrl // 新增：发送图片 URL
         }),
       });
 
@@ -38,7 +40,8 @@ export default function AddActivity() {
         setTitle('');
         setDescription('');
         setServiceHours(0);
-        router.push('/admin/my-activities'); // 成功后跳转到我发布的活动页面
+        setImageUrl(''); // 清空图片 URL
+        router.push('/admin/my-activities');
       } else {
         setMessage(data.message);
       }
@@ -85,6 +88,17 @@ export default function AddActivity() {
             onChange={(e) => setServiceHours(e.target.value)}
             required
             min="0"
+          />
+        </div>
+        {/* 新增：图片 URL 输入框 */}
+        <div className="mb-4">
+          <label className="block text-gray-700 font-bold mb-2">图片 URL (可选)</label>
+          <input
+            type="text"
+            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+            value={imageUrl}
+            onChange={(e) => setImageUrl(e.target.value)}
+            placeholder="例如: https://example.com/activity.jpg"
           />
         </div>
         <div className="flex items-center justify-between">

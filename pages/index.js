@@ -67,7 +67,44 @@ export default function HomePage({ initialActivities }) {
           )}
         </div>
       </div>
-      <ul className="space-y-4">
+      {
+                <ul className="grid grid-cols-1 md:grid-cols-2">
+            {activities.map(activity => (
+              <li key={activity.id} className="bg-white p-6 rounded-lg shadow-md flex flex-col">
+                {activity.image_url && (
+                  <img 
+                    src={activity.image_url} 
+                    alt={activity.title} 
+                    className="w-full h-48 object-cover rounded-md mb-4" 
+                  />
+                )}
+                <h2 className="text-xl font-bold mb-2">{activity.title}</h2>
+                <p className="text-gray-600 mb-1">发布者: {activity.creator_username || '未知'}</p>
+                <p className="text-gray-600 mb-4">服务时长: {activity.service_hours} 小时</p>
+                
+                <div className="mt-auto flex justify-between items-center">
+                  {isLoggedIn ? (
+                    <button
+                      onClick={() => handleSignup(activity.id)}
+                      className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition-colors"
+                    >
+                      我要报名
+                    </button>
+                  ) : (
+                    <span className="text-sm text-gray-500">登录后报名</span>
+                  )}
+                  {/* 新增：查看详情按钮 */}
+                  <button
+                    onClick={() => router.push(`/activities/${activity.id}`)}
+                    className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors ml-2"
+                  >
+                    查看详情
+                  </button>
+                </div>
+              </li>
+            ))}
+          </ul>
+      /* <ul className="space-y-4">
         {activities.map(activity => (
           <li key={activity.id} className="p-4 border rounded-lg shadow-sm">
             <h3 className="text-xl font-semibold mb-2">{activity.title}</h3>
@@ -93,7 +130,7 @@ export default function HomePage({ initialActivities }) {
             )}
           </li>
         ))}
-      </ul>
+      </ul> */}
     </div>
   );
 }
